@@ -1,4 +1,7 @@
+import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
+import { useAuthStore } from '../../features/auth/authStore'
 
 type NavItem = {
   to: string
@@ -38,25 +41,80 @@ const navItems: NavItem[] = [
 ]
 
 export const BottomNav = () => {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const user = useAuthStore((s) => s.user)
+  const clearAuth = useAuthStore((s) => s.clearAuth)
+  const queryClient = useQueryClient()
+
+  const handleLogout = () => {
+    // Limpia toda la caché de TanStack Query para que el próximo login parta de cero
+    queryClient.clear()
+    clearAuth()
+  }
+
+  const initial = user?.email?.[0].toUpperCase() ?? '?'
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-800 bg-gray-950">
-      <div className="flex h-16 items-center justify-around">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.to === '/'}
-            className={({ isActive }) =>
-              `flex flex-col items-center gap-1 px-6 py-2 text-xs font-medium transition-colors ${
-                isActive ? 'text-indigo-400' : 'text-gray-500'
-              }`
-            }
+    <>
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-800 bg-gray-950">
+        <div className="flex h-16 items-center justify-around">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === '/'}
+              className={({ isActive }) =>
+                `flex flex-col items-center gap-1 px-6 py-2 text-xs font-medium transition-colors ${
+                  isActive ? 'text-indigo-400' : 'text-gray-500'
+                }`
+              }
+            >
+              {item.icon}
+              <span>{item.label}</span>
+            </NavLink>
+          ))}
+
+          {/* Avatar del usuario — abre el sheet de perfil */}
+          <button
+            type="button"
+            onClick={() => setMenuOpen(true)}
+            className="flex flex-col items-center gap-1 px-6 py-2 text-xs font-medium text-gray-500"
           >
-            {item.icon}
-            <span>{item.label}</span>
-          </NavLink>
-        ))}
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
+              {initial}
+            </span>
+            <span>Perfil</span>
+          </button>
+        </div>
+      </nav>
+
+      {/* Sheet de usuario / logout */}
+      <div
+        className={`fixed inset-0 z-40 bg-black/60 transition-opacity duration-300 ${
+          menuOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
+        }`}
+        onClick={() => setMenuOpen(false)}
+      />
+      <div
+        className={`fixed inset-x-0 bottom-0 z-50 rounded-t-2xl bg-gray-900 transition-transform duration-300 ${
+          menuOpen ? 'translate-y-0' : 'translate-y-full'
+        }`}
+      >
+        <div className="flex justify-center pt-3">
+          <div className="h-1 w-10 rounded-full bg-gray-700" />
+        </div>
+        <div className="p-5 pb-10">
+          <p className="text-sm font-semibold text-white">{user?.email?.split('@')[0]}</p>
+          <p className="text-xs text-gray-500">{user?.email}</p>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="mt-5 w-full rounded-xl bg-red-600/20 py-3.5 text-sm font-semibold text-red-400 active:bg-red-600/30"
+          >
+            Cerrar sesión
+          </button>
+        </div>
       </div>
-    </nav>
+    </>
   )
 }
