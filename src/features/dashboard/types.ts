@@ -26,3 +26,15 @@ export type TrainingDaySummary = {
   date: string  // YYYY-MM-DD
   workoutSessions: SessionSummary[]
 }
+
+export type PersonalRecord = {
+  exerciseName: string
+  maxWeight: number
+  date: string  // YYYY-MM-DD
+}
+
+export type MuscleVolume = {
+  muscle: string
+  volume: number
+  sets: number
+}

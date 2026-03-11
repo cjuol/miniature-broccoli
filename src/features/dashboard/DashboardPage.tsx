@@ -3,7 +3,9 @@ import { useAuthStore } from '../auth/authStore'
 import { SessionHistorySheet } from './SessionHistorySheet'
 import { StatCard } from './StatCard'
 import { TrainingDayCard } from './TrainingDayCard'
+import { usePersonalRecords } from './usePersonalRecords'
 import { useTrainingDays } from './useTrainingDays'
+import { useVolumeMetrics } from './useVolumeMetrics'
 
 const MONTH_NAMES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -19,6 +21,14 @@ export default function DashboardPage() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
 
   const { data: trainingDays, isLoading, isError } = useTrainingDays({ year, month })
+
+  // Rango del mes seleccionado para el endpoint de volumen
+  const from = `${year}-${String(month).padStart(2, '0')}-01`
+  const lastDay = new Date(year, month, 0).getDate()
+  const to = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`
+
+  const { data: volumeData } = useVolumeMetrics(from, to)
+  const { data: prData } = usePersonalRecords()
 
   const prevMonth = () => {
     if (month === 1) { setYear((y) => y - 1); setMonth(12) }
@@ -44,6 +54,13 @@ export default function DashboardPage() {
     )
     return { totalDays: days, totalSets: sets }
   }, [trainingDays])
+
+  // Volumen total del mes en toneladas — calculado desde el endpoint de métricas
+  const totalVolumeLabel = useMemo(() => {
+    if (!volumeData?.muscles.length) return null
+    const kg = volumeData.muscles.reduce((acc, m) => acc + m.volume, 0)
+    return `${(kg / 1000).toFixed(1)} t`
+  }, [volumeData])
 
   const sortedDays = useMemo(
     () => [...(trainingDays ?? [])].sort((a, b) => b.date.localeCompare(a.date)),
@@ -83,8 +100,11 @@ export default function DashboardPage() {
         {/* Tarjetas de métricas */}
         {!isLoading && (
           <div className="flex gap-3">
-            <StatCard value={totalDays} label="Días entrenados" />
-            <StatCard value={totalSets} label="Series totales" />
+            <StatCard value={totalDays} label="Días" />
+            <StatCard value={totalSets} label="Series" />
+            {totalVolumeLabel && (
+              <StatCard value={totalVolumeLabel} label="Volumen" />
+            )}
           </div>
         )}
 
@@ -92,6 +112,33 @@ export default function DashboardPage() {
           <div className="flex gap-3">
             <div className="flex-1 h-20 animate-pulse rounded-xl bg-gray-900" />
             <div className="flex-1 h-20 animate-pulse rounded-xl bg-gray-900" />
+          </div>
+        )}
+
+        {/* Récords personales — no dependen del mes seleccionado */}
+        {prData && prData.personalRecords.length > 0 && (
+          <div>
+            <h2 className="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-500">
+              Récords personales
+            </h2>
+            <div className="rounded-xl bg-gray-900 divide-y divide-gray-800">
+              {prData.personalRecords.slice(0, 8).map((pr) => (
+                <div
+                  key={pr.exerciseName}
+                  className="flex items-center justify-between px-4 py-3"
+                >
+                  <span className="text-sm text-white">{pr.exerciseName}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-semibold text-indigo-400">
+                      {pr.maxWeight} kg
+                    </span>
+                    <span className="text-xs text-gray-600">
+                      {new Date(pr.date).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
@@ -127,6 +174,7 @@ export default function DashboardPage() {
         date={selectedDate}
         onClose={() => setSelectedDate(null)}
       />
+
     </>
   )
 }
