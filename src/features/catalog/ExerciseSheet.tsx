@@ -1,3 +1,6 @@
+import { useState } from 'react'
+import { useAddExerciseMutation } from '../workout/useAddExerciseMutation'
+import { useWorkoutSessionStore } from '../workout/workoutSessionStore'
 import { EQUIPMENT_LABELS } from './equipmentLabels'
 import { useExercise } from './useExercise'
 
@@ -10,6 +13,20 @@ export const ExerciseSheet = ({ exerciseId, onClose }: Props) => {
   const { data: exercise, isLoading } = useExercise(exerciseId)
   const isOpen = !!exerciseId
 
+  const sessionId = useWorkoutSessionStore((s) => s.sessionId)
+  const { mutate: addExercise, isPending: isAdding, isSuccess: wasAdded } = useAddExerciseMutation()
+  const [added, setAdded] = useState(false)
+
+  const handleAddToSession = () => {
+    if (!exerciseId) return
+    addExercise(
+      { exerciseId },
+      {
+        onSuccess: () => setAdded(true),
+      },
+    )
+  }
+
   return (
     <>
       {/* Overlay — cierra el sheet al tocar fuera */}
@@ -17,7 +34,10 @@ export const ExerciseSheet = ({ exerciseId, onClose }: Props) => {
         className={`fixed inset-0 z-40 bg-black/60 transition-opacity duration-300 ${
           isOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
         }`}
-        onClick={onClose}
+        onClick={() => {
+          setAdded(false)
+          onClose()
+        }}
       />
 
       {/* Sheet */}
@@ -26,7 +46,6 @@ export const ExerciseSheet = ({ exerciseId, onClose }: Props) => {
           isOpen ? 'translate-y-0' : 'translate-y-full'
         }`}
       >
-        {/* Handle visual */}
         <div className="flex justify-center pt-3">
           <div className="h-1 w-10 rounded-full bg-gray-700" />
         </div>
@@ -71,13 +90,14 @@ export const ExerciseSheet = ({ exerciseId, onClose }: Props) => {
                 </>
               )}
 
-              {/* Deshabilitado hasta la Fase 6 — se activará al integrar la sesión activa */}
+              {/* El botón se activa solo si hay una sesión en curso */}
               <button
                 type="button"
-                disabled
+                disabled={!sessionId || isAdding}
+                onClick={handleAddToSession}
                 className="mt-6 w-full rounded-xl bg-indigo-600 py-3.5 text-sm font-semibold text-white disabled:opacity-40"
               >
-                Añadir a sesión
+                {added || wasAdded ? '✓ Añadido' : isAdding ? 'Añadiendo…' : 'Añadir a sesión'}
               </button>
             </>
           )}
