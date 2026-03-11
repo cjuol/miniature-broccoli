@@ -1,16 +1,20 @@
-import { useState } from 'react'
-import { ExerciseCard } from '../catalog/ExerciseCard'
-import { useExercises } from '../catalog/useExercises'
 import { useAddExerciseMutation } from './useAddExerciseMutation'
+
+type ExerciseItem = {
+  id: string
+  name: string
+}
 
 type Props = {
   isOpen: boolean
   onClose: () => void
+  exercises: ExerciseItem[] | undefined
+  isLoadingExercises: boolean
+  search: string
+  onSearchChange: (value: string) => void
 }
 
-export const AddExerciseSheet = ({ isOpen, onClose }: Props) => {
-  const [search, setSearch] = useState('')
-  const { data: exercises, isLoading } = useExercises(search ? { search } : {})
+export const AddExerciseSheet = ({ isOpen, onClose, exercises, isLoadingExercises, search, onSearchChange }: Props) => {
   const { mutate: addExercise, isPending } = useAddExerciseMutation()
 
   const handleSelect = (exerciseId: string) => {
@@ -42,13 +46,13 @@ export const AddExerciseSheet = ({ isOpen, onClose }: Props) => {
             type="search"
             placeholder="Buscar…"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => onSearchChange(e.target.value)}
             className="mt-3 w-full rounded-xl border border-gray-700 bg-gray-900 px-4 py-2.5 text-sm text-white placeholder-gray-600 outline-none focus:border-indigo-500"
           />
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 pb-10">
-          {isLoading && (
+          {isLoadingExercises && (
             <div className="space-y-2 pt-2">
               {Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="h-16 animate-pulse rounded-xl bg-gray-900" />
@@ -59,11 +63,14 @@ export const AddExerciseSheet = ({ isOpen, onClose }: Props) => {
           {exercises && !isPending && (
             <div className="space-y-2 pt-2">
               {exercises.map((exercise) => (
-                <ExerciseCard
+                <button
                   key={exercise.id}
-                  exercise={exercise}
-                  onClick={handleSelect}
-                />
+                  type="button"
+                  className="w-full rounded-xl bg-gray-900 px-4 py-3.5 text-left text-sm font-medium text-white active:bg-gray-800"
+                  onClick={() => handleSelect(exercise.id)}
+                >
+                  {exercise.name}
+                </button>
               ))}
             </div>
           )}

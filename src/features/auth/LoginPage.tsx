@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLoginMutation } from './useLoginMutation'
-import type { ApiError } from '../../config/apiClient'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -17,8 +16,6 @@ export default function LoginPage() {
       { onSuccess: () => navigate('/') },
     )
   }
-
-  const apiError = error as ApiError | null
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-950 px-4">
@@ -60,9 +57,9 @@ export default function LoginPage() {
             />
           </div>
 
-          {apiError && (
+          {error && (
             <p className="rounded-lg bg-red-950 px-4 py-3 text-sm text-red-400">
-              {apiError.message ?? 'Credenciales incorrectas. Inténtalo de nuevo.'}
+              {error.message ?? 'Credenciales incorrectas. Inténtalo de nuevo.'}
             </p>
           )}
 

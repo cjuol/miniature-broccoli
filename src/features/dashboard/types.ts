@@ -26,3 +26,10 @@ export type TrainingDaySummary = {
   date: string  // YYYY-MM-DD
   workoutSessions: SessionSummary[]
 }
+
+export type SessionDetail = {
+  id: string
+  startedAt: string
+  finishedAt?: string
+  exerciseEntries: ExerciseEntrySummary[]
+}

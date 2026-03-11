@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useAddExerciseMutation } from '../workout/useAddExerciseMutation'
+import { useWorkoutSessionStore } from '../workout/workoutSessionStore'
 import { ExerciseCard } from './ExerciseCard'
 import { ExerciseSheet } from './ExerciseSheet'
 import { MUSCLE_GROUPS } from './equipmentLabels'
@@ -19,6 +21,10 @@ export default function CatalogPage() {
   const [search, setSearch] = useState('')
   const [selectedMuscle, setSelectedMuscle] = useState<string | null>(null)
   const [selectedExerciseId, setSelectedExerciseId] = useState<string | null>(null)
+  const [exerciseAdded, setExerciseAdded] = useState(false)
+
+  const sessionId = useWorkoutSessionStore((s) => s.sessionId)
+  const { mutate: addExercise, isPending: isAdding } = useAddExerciseMutation()
 
   const filters: ExerciseFilters = {
     ...(search ? { search } : {}),
@@ -91,7 +97,14 @@ export default function CatalogPage() {
 
       <ExerciseSheet
         exerciseId={selectedExerciseId}
-        onClose={() => setSelectedExerciseId(null)}
+        onClose={() => {
+          setExerciseAdded(false)
+          setSelectedExerciseId(null)
+        }}
+        sessionActive={!!sessionId}
+        isAddingToSession={isAdding}
+        wasAddedToSession={exerciseAdded}
+        onAddToSession={(id) => addExercise({ exerciseId: id }, { onSuccess: () => setExerciseAdded(true) })}
       />
     </>
   )
