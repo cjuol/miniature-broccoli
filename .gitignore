@@ -1,5 +1,8 @@
 # Claude Code — instrucciones locales del agente (no se sube al repo)
 CLAUDE.md
+.claude/
+.github/CONTEXT.md
+.github/copilot-instructions.md
 
 # Dependencias
 node_modules/
