@@ -1,0 +1,39 @@
+{
+  "name": "miniature-broccoli",
+  "version": "1.0.0",
+  "description": "IronTrack — Training diary frontend",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "tsc --noEmit",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cjuol/miniature-broccoli.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+"bugs": {
+    "url": "https://github.com/cjuol/miniature-broccoli/issues"
+  },
+  "homepage": "https://github.com/cjuol/miniature-broccoli#readme",
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.2.1",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.4",
+    "tailwindcss": "^4.2.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.90.21",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-router-dom": "^6.30.3",
+    "zustand": "^5.0.11"
+  }
+}
