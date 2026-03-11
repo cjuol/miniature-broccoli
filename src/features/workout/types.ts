@@ -35,12 +35,36 @@ export type ExerciseEntry = {
   setEntries: SetEntry[]
 }
 
+export type CardioType = 'run' | 'bike' | 'row' | 'ski' | 'walk' | 'rope'
+
+export type CardioEntry = {
+  id: string
+  cardioType: CardioType
+  durationSeconds: number
+  distanceMeters: number | null
+  avgSpeedKmh: number | null
+  inclinePct: number | null
+  notes: string | null
+  paceMinPerKm: number | null
+}
+
+export type MetabolicEntry = {
+  id: string
+  weekNumber: number | null
+  roundsCompleted: number | null
+  timeSeconds: number | null
+  result: string | null
+  notes: string | null
+}
+
 export type WorkoutSession = {
   id: string
   status: SessionStatus
   startedAt: string
   finishedAt?: string
   exerciseEntries: ExerciseEntry[]
+  cardioEntries: CardioEntry[]
+  metabolicEntries: MetabolicEntry[]
 }
 
 export type LogSetInput = {
@@ -52,4 +76,18 @@ export type LogSetInput = {
 
 export type AddExerciseInput = {
   exerciseId: string
+}
+
+export type LastPerformanceSet = {
+  id: string
+  weightKg: number
+  repsCompleted: number
+  rirActual: number | null
+  toFailure: boolean
+}
+
+export type LastPerformance = {
+  exercise: { id: string; name: string }
+  summary: { maxWeight: number; totalVolume: number; sets: number } | null
+  sets: LastPerformanceSet[]
 }
