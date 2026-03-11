@@ -1,7 +1,6 @@
+import { RouterProvider } from 'react-router-dom'
+import { router } from './router'
+
 export default function App() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-950">
-      <p className="text-xl font-semibold text-white">IronTrack 🏋️</p>
-    </div>
-  )
+  return <RouterProvider router={router} />
 }
