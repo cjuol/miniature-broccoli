@@ -19,8 +19,10 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
   const response = await fetch(`${BASE_URL}${path}`, { ...options, headers })
 
   if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
     const error: ApiError = {
-      message: (await response.json().catch(() => ({ message: response.statusText }))).message,
+      // El backend de la API devuelve { error: "..." }; Lexik JWT devuelve { message: "..." }
+      message: body.error ?? body.message ?? response.statusText,
       status: response.status,
     }
     throw error

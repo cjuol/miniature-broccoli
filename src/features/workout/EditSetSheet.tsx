@@ -1,45 +1,43 @@
 import { useState } from 'react'
-import { useLastPerformance } from './useLastPerformance'
-import { useLogSetMutation } from './useLogSetMutation'
-import type { LogSetInput } from './types'
+import { useDeleteSetMutation } from './useDeleteSetMutation'
+import { useEditSetMutation } from './useEditSetMutation'
+import type { LogSetInput, SetEntry } from './types'
 
 type Props = {
+  set: SetEntry
   exerciseEntryId: string
-  exerciseId: string
   exerciseName: string
   isOpen: boolean
   onClose: () => void
 }
 
-export const LogSetSheet = ({ exerciseEntryId, exerciseId, exerciseName, isOpen, onClose }: Props) => {
-  const [weightKg, setWeightKg] = useState('')
-  const [reps, setReps] = useState('')
-  const [rir, setRir] = useState('')
-  const [toFailure, setToFailure] = useState(false)
+export const EditSetSheet = ({ set, exerciseEntryId, exerciseName, isOpen, onClose }: Props) => {
+  const [weightKg, setWeightKg] = useState(String(set.weightKg))
+  const [reps, setReps] = useState(String(set.repsCompleted))
+  const [rir, setRir] = useState(set.rirActual !== null ? String(set.rirActual) : '')
+  const [toFailure, setToFailure] = useState(set.toFailure)
 
-  const { mutate: logSet } = useLogSetMutation()
-  const { data: lastPerf, isLoading: isLoadingLastPerf } = useLastPerformance(exerciseId, isOpen)
+  const { mutate: editSet } = useEditSetMutation()
+  const { mutate: deleteSet } = useDeleteSetMutation()
 
-  const reset = () => {
-    setWeightKg('')
-    setReps('')
-    setRir('')
-    setToFailure(false)
-  }
-
-  const handleSubmit = () => {
+  const handleSave = () => {
     const input: LogSetInput = {
       weightKg: parseFloat(weightKg),
       repsCompleted: parseInt(reps, 10),
       toFailure,
       ...(toFailure ? {} : { rirActual: parseInt(rir || '0', 10) }),
     }
-    logSet({ exerciseEntryId, input })
-    reset()
+    editSet({ setId: set.id, exerciseEntryId, input })
     onClose()
   }
 
-  const isValid = weightKg !== '' && reps !== '' && !isNaN(parseFloat(weightKg)) && !isNaN(parseInt(reps, 10))
+  const handleDelete = () => {
+    deleteSet({ setId: set.id, exerciseEntryId })
+    onClose()
+  }
+
+  const isValid =
+    weightKg !== '' && reps !== '' && !isNaN(parseFloat(weightKg)) && !isNaN(parseInt(reps, 10))
 
   return (
     <>
@@ -61,35 +59,7 @@ export const LogSetSheet = ({ exerciseEntryId, exerciseId, exerciseName, isOpen,
 
         <div className="p-5 pb-10">
           <h2 className="text-lg font-bold text-white">{exerciseName}</h2>
-          <p className="mt-0.5 text-xs text-gray-500">Nueva serie</p>
-
-          {/* Bloque de última sesión — solo visible si hay datos o está cargando */}
-          {isLoadingLastPerf && (
-            <div className="mt-4 space-y-1.5">
-              <div className="h-2.5 w-20 animate-pulse rounded bg-gray-800" />
-              <div className="h-2.5 w-36 animate-pulse rounded bg-gray-800" />
-              <div className="h-2.5 w-36 animate-pulse rounded bg-gray-800" />
-            </div>
-          )}
-
-          {!isLoadingLastPerf && lastPerf && lastPerf.sets.length > 0 && (
-            <div className="mt-4">
-              <p className="mb-1.5 text-xs font-medium text-gray-600">Última sesión</p>
-              <div className="space-y-1">
-                {lastPerf.sets.map((set, i) => (
-                  <div key={set.id} className="flex items-center gap-2 text-xs text-gray-500">
-                    <span className="w-4 text-gray-700">{i + 1}.</span>
-                    <span>{set.weightKg} kg × {set.repsCompleted} reps</span>
-                    {set.toFailure ? (
-                      <span>· al fallo</span>
-                    ) : set.rirActual !== null ? (
-                      <span>· RIR {set.rirActual}</span>
-                    ) : null}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <p className="mt-0.5 text-xs text-gray-500">Editar serie</p>
 
           <div className="mt-5 grid grid-cols-2 gap-3">
             <div>
@@ -97,7 +67,6 @@ export const LogSetSheet = ({ exerciseEntryId, exerciseId, exerciseName, isOpen,
               <input
                 type="number"
                 inputMode="decimal"
-                placeholder="100"
                 value={weightKg}
                 onChange={(e) => setWeightKg(e.target.value)}
                 className="w-full rounded-xl border border-gray-700 bg-gray-800 px-3 py-3 text-center text-lg font-semibold text-white outline-none focus:border-indigo-500"
@@ -108,7 +77,6 @@ export const LogSetSheet = ({ exerciseEntryId, exerciseId, exerciseName, isOpen,
               <input
                 type="number"
                 inputMode="numeric"
-                placeholder="8"
                 value={reps}
                 onChange={(e) => setReps(e.target.value)}
                 className="w-full rounded-xl border border-gray-700 bg-gray-800 px-3 py-3 text-center text-lg font-semibold text-white outline-none focus:border-indigo-500"
@@ -116,7 +84,6 @@ export const LogSetSheet = ({ exerciseEntryId, exerciseId, exerciseName, isOpen,
             </div>
           </div>
 
-          {/* Toggle al fallo */}
           <div className="mt-4 flex items-center justify-between">
             <span className="text-sm text-gray-300">Al fallo</span>
             <button
@@ -134,7 +101,6 @@ export const LogSetSheet = ({ exerciseEntryId, exerciseId, exerciseName, isOpen,
             </button>
           </div>
 
-          {/* Campo RIR — solo si no es al fallo */}
           {!toFailure && (
             <div className="mt-3">
               <label className="mb-1 block text-xs text-gray-400">RIR (reps en reserva)</label>
@@ -152,10 +118,18 @@ export const LogSetSheet = ({ exerciseEntryId, exerciseId, exerciseName, isOpen,
           <button
             type="button"
             disabled={!isValid}
-            onClick={handleSubmit}
+            onClick={handleSave}
             className="mt-6 w-full rounded-xl bg-indigo-600 py-3.5 text-sm font-semibold text-white disabled:opacity-40"
           >
-            Guardar serie
+            Guardar cambios
+          </button>
+
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="mt-3 w-full rounded-xl py-3 text-sm font-medium text-red-500 active:text-red-400"
+          >
+            Eliminar serie
           </button>
         </div>
       </div>
