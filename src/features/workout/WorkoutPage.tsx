@@ -23,7 +23,11 @@ export default function WorkoutPage() {
   const { data: session, isLoading, isError } = useSession()
   const { mutate: startSession, isPending: isStarting } = useStartSessionMutation()
   const { mutate: finishSession, isPending: isFinishing } = useFinishSessionMutation()
-  const { data: exercises, isLoading: isLoadingExercises } = useExercises(exerciseSearch ? { search: exerciseSearch } : {})
+  const shouldFetchExercises = !!sessionId
+  const { data: exercises, isLoading: isLoadingExercises } = useExercises(
+    exerciseSearch ? { search: exerciseSearch } : {},
+    { enabled: shouldFetchExercises },
+  )
 
   if (!sessionId) {
     return (
