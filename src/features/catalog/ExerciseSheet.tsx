@@ -1,31 +1,25 @@
-import { useState } from 'react'
-import { useAddExerciseMutation } from '../workout/useAddExerciseMutation'
-import { useWorkoutSessionStore } from '../workout/workoutSessionStore'
 import { EQUIPMENT_LABELS } from './equipmentLabels'
 import { useExercise } from './useExercise'
 
 type Props = {
   exerciseId: string | null
   onClose: () => void
+  sessionActive: boolean
+  isAddingToSession: boolean
+  wasAddedToSession: boolean
+  onAddToSession: (exerciseId: string) => void
 }
 
-export const ExerciseSheet = ({ exerciseId, onClose }: Props) => {
+export const ExerciseSheet = ({
+  exerciseId,
+  onClose,
+  sessionActive,
+  isAddingToSession,
+  wasAddedToSession,
+  onAddToSession,
+}: Props) => {
   const { data: exercise, isLoading } = useExercise(exerciseId)
   const isOpen = !!exerciseId
-
-  const sessionId = useWorkoutSessionStore((s) => s.sessionId)
-  const { mutate: addExercise, isPending: isAdding, isSuccess: wasAdded } = useAddExerciseMutation()
-  const [added, setAdded] = useState(false)
-
-  const handleAddToSession = () => {
-    if (!exerciseId) return
-    addExercise(
-      { exerciseId },
-      {
-        onSuccess: () => setAdded(true),
-      },
-    )
-  }
 
   return (
     <>
@@ -34,10 +28,7 @@ export const ExerciseSheet = ({ exerciseId, onClose }: Props) => {
         className={`fixed inset-0 z-40 bg-black/60 transition-opacity duration-300 ${
           isOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
         }`}
-        onClick={() => {
-          setAdded(false)
-          onClose()
-        }}
+        onClick={onClose}
       />
 
       {/* Sheet */}
@@ -93,11 +84,11 @@ export const ExerciseSheet = ({ exerciseId, onClose }: Props) => {
               {/* El botón se activa solo si hay una sesión en curso */}
               <button
                 type="button"
-                disabled={!sessionId || isAdding}
-                onClick={handleAddToSession}
+                disabled={!sessionActive || isAddingToSession}
+                onClick={() => onAddToSession(exerciseId!)}
                 className="mt-6 w-full rounded-xl bg-indigo-600 py-3.5 text-sm font-semibold text-white disabled:opacity-40"
               >
-                {added || wasAdded ? '✓ Añadido' : isAdding ? 'Añadiendo…' : 'Añadir a sesión'}
+                {wasAddedToSession ? '✓ Añadido' : isAddingToSession ? 'Añadiendo…' : 'Añadir a sesión'}
               </button>
             </>
           )}

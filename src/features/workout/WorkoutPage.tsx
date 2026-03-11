@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useExercises } from '../catalog/useExercises'
 import { ActiveExerciseCard } from './ActiveExerciseCard'
 import { AddExerciseSheet } from './AddExerciseSheet'
 import { SessionTimer } from './SessionTimer'
@@ -17,10 +18,12 @@ export default function WorkoutPage() {
   const sessionId = useWorkoutSessionStore((s) => s.sessionId)
   const [addSheetOpen, setAddSheetOpen] = useState(false)
   const [confirmFinish, setConfirmFinish] = useState(false)
+  const [exerciseSearch, setExerciseSearch] = useState('')
 
   const { data: session, isLoading, isError } = useSession()
   const { mutate: startSession, isPending: isStarting } = useStartSessionMutation()
   const { mutate: finishSession, isPending: isFinishing } = useFinishSessionMutation()
+  const { data: exercises, isLoading: isLoadingExercises } = useExercises(exerciseSearch ? { search: exerciseSearch } : {})
 
   if (!sessionId) {
     return (
@@ -120,6 +123,10 @@ export default function WorkoutPage() {
       <AddExerciseSheet
         isOpen={addSheetOpen}
         onClose={() => setAddSheetOpen(false)}
+        exercises={exercises}
+        isLoadingExercises={isLoadingExercises}
+        search={exerciseSearch}
+        onSearchChange={setExerciseSearch}
       />
     </>
   )
