@@ -9,12 +9,14 @@ export const useFinishSessionMutation = () => {
 
   return useMutation({
     mutationFn: () =>
-      apiFetch<WorkoutSession>(`/sessions/${sessionId}/finish`, {
+      apiFetch<WorkoutSession>(`/v1/sessions/${sessionId}/finish`, {
         method: 'PUT',
         body: JSON.stringify({}),
       }),
     onSuccess: () => {
       queryClient.removeQueries({ queryKey: ['session', sessionId] })
+      queryClient.invalidateQueries({ queryKey: ['training-days'] })
+      queryClient.invalidateQueries({ queryKey: ['training-day'] })
       endSession()
     },
   })

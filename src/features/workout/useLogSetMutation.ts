@@ -14,9 +14,14 @@ export const useLogSetMutation = () => {
 
   return useMutation({
     mutationFn: ({ exerciseEntryId, input }: LogSetParams) =>
-      apiFetch<SetEntry>(`/exercise-entries/${exerciseEntryId}/sets`, {
+      apiFetch<SetEntry>(`/v1/exercise-entries/${exerciseEntryId}/sets`, {
         method: 'POST',
-        body: JSON.stringify(input),
+        body: JSON.stringify({
+          weightKg: input.weightKg,
+          reps: input.repsCompleted,
+          rir: input.rirActual,
+          toFailure: input.toFailure,
+        }),
       }),
 
     onMutate: async ({ exerciseEntryId, input }) => {

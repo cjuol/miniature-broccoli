@@ -16,7 +16,9 @@ export type SessionSummary = {
   id: string
   startedAt: string
   finishedAt?: string
-  exerciseEntries: ExerciseEntrySummary[]
+  // exerciseEntries no está disponible en el grupo training-day:read del backend;
+  // para obtenerlo hay que llamar al endpoint /v1/sessions/{id} (session:read).
+  exerciseEntries?: ExerciseEntrySummary[]
 }
 
 export type TrainingDaySummary = {

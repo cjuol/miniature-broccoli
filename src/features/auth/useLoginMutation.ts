@@ -8,7 +8,7 @@ export const useLoginMutation = () => {
 
   return useMutation({
     mutationFn: (credentials: LoginCredentials) =>
-      apiFetch<LoginResponse>('/auth/login', {
+      apiFetch<LoginResponse>('/login', {
         method: 'POST',
         body: JSON.stringify(credentials),
       }),

@@ -1,11 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { apiFetch } from '../../config/apiClient'
-import { useWorkoutSessionStore } from './workoutSessionStore'
-import type { WorkoutSession } from './types'
+// Reutilizamos WorkoutSession del feature workout ya que session:read devuelve la misma forma
+import type { WorkoutSession } from '../workout/types'
 
-export const useSession = () => {
-  const sessionId = useWorkoutSessionStore((s) => s.sessionId)
-
+export const useSessionDetail = (sessionId: string | null) => {
   return useQuery({
     queryKey: ['session', sessionId],
     queryFn: () => apiFetch<WorkoutSession>(`/v1/sessions/${sessionId}`),

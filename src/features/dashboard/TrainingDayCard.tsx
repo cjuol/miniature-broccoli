@@ -19,7 +19,8 @@ export const TrainingDayCard = ({ day, onClick }: Props) => {
   const session = day.workoutSessions[0]
   if (!session) return null
 
-  const exerciseCount = session.exerciseEntries.length
+  // exerciseEntries no viene en el grupo training-day:read del backend; usamos ?? para no crashear
+  const exerciseCount = session.exerciseEntries?.length ?? 0
   const duration = durationBetween(session.startedAt, session.finishedAt)
   const isOngoing = !session.finishedAt
 

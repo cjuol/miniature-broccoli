@@ -1,5 +1,5 @@
 export type AuthUser = {
-  id: number
+  id: string
   email: string
 }
 
@@ -10,5 +10,5 @@ export type LoginCredentials = {
 
 export type LoginResponse = {
   token: string
-  user: AuthUser
+  user?: AuthUser
 }

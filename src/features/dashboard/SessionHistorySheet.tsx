@@ -1,4 +1,5 @@
 import { durationBetween, formatDuration } from '../../utils/time'
+import { useSessionDetail } from './useSessionDetail'
 import { useTrainingDayDetail } from './useTrainingDayDetail'
 
 type Props = {
@@ -7,9 +8,15 @@ type Props = {
 }
 
 export const SessionHistorySheet = ({ date, onClose }: Props) => {
-  const { data: day, isLoading } = useTrainingDayDetail(date)
+  const { data: day, isLoading: isDayLoading } = useTrainingDayDetail(date)
   const isOpen = !!date
 
+  // Solo el primer sessionId del día — training-day:read no incluye exerciseEntries.
+  // Hacemos una segunda petición al endpoint de sesión (session:read) para obtenerlas.
+  const sessionId = day?.workoutSessions[0]?.id ?? null
+  const { data: sessionDetail, isLoading: isSessionLoading } = useSessionDetail(sessionId)
+
+  const isLoading = isDayLoading || isSessionLoading
   const session = day?.workoutSessions[0]
 
   const formatDate = (d: string) =>
@@ -54,7 +61,7 @@ export const SessionHistorySheet = ({ date, onClose }: Props) => {
             </div>
           )}
 
-          {session?.exerciseEntries.map((entry) => (
+          {sessionDetail?.exerciseEntries.map((entry) => (
             <div key={entry.id} className="mb-3 rounded-xl bg-gray-800 p-4">
               <p className="font-semibold text-white">{entry.exercise.name}</p>
 

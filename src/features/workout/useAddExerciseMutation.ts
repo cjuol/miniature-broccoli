@@ -9,7 +9,7 @@ export const useAddExerciseMutation = () => {
 
   return useMutation({
     mutationFn: (input: AddExerciseInput) =>
-      apiFetch<ExerciseEntry>(`/sessions/${sessionId}/exercises`, {
+      apiFetch<ExerciseEntry>(`/v1/sessions/${sessionId}/exercises`, {
         method: 'POST',
         body: JSON.stringify(input),
       }),

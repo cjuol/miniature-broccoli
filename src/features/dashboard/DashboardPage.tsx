@@ -37,7 +37,7 @@ export default function DashboardPage() {
       (acc, day) =>
         acc +
         day.workoutSessions.reduce(
-          (sAcc, s) => sAcc + s.exerciseEntries.reduce((eAcc, e) => eAcc + e.setEntries.length, 0),
+          (sAcc, s) => sAcc + (s.exerciseEntries ?? []).reduce((eAcc, e) => eAcc + e.setEntries.length, 0),
           0,
         ),
       0,

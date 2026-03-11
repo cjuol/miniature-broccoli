@@ -15,6 +15,6 @@ export const useTrainingDays = (params: Params = {}) => {
   return useQuery({
     queryKey: ['training-days', year, month],
     queryFn: () =>
-      apiFetch<TrainingDaySummary[]>(`/training-days?year=${year}&month=${month}`),
+      apiFetch<TrainingDaySummary[]>(`/v1/training-days?year=${year}&month=${month}`),
   })
 }

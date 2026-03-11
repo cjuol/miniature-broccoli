@@ -48,7 +48,7 @@ export default function WorkoutPage() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs uppercase tracking-widest text-indigo-400">Sesión activa</p>
-            <SessionTimer />
+            <SessionTimer paused={confirmFinish} />
           </div>
 
           {confirmFinish ? (
